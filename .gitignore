@@ -1,0 +1,60 @@
+# --- Python Environment ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.python-version
+
+# --- Virtual Environments ---
+.venv/
+venv/
+env/
+ENV/
+build/
+dist/
+*.egg-info/
+
+# --- Environment Variables & Secrets ---
+# Crucial: Never commit your actual secrets to version control
+.env
+.env.*
+# Exception: allow committing an example file as a template
+!.env.example
+
+# --- Database ---
+# Local SQLite databases
+*.sqlite3
+*.db
+
+# --- Logs ---
+*.log
+logs/
+
+# --- IDEs & Editors ---
+# JetBrains (PyCharm)
+.idea/
+# VS Code
+.vscode/
+*.code-workspace
+# Vim
+*.swp
+*.swo
+
+# --- Testing & Quality Assurance ---
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.tox/
+nosetests.xml
+coverage.xml
+*.stackdump
+
+# --- Docker ---
+# Ignore local data volumes
+.docker/
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
