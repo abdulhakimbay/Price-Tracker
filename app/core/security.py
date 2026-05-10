@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from jose import jwt
+from jose import JWTError, jwt
 from passlib.context import CryptContext
 
 from app.core.config import settings
@@ -57,3 +57,7 @@ def create_tokens_for_user(user_id: int) -> RefreshToken:
         refresh_token=create_refresh_token(user_id),
         token_type="bearer",
     )
+
+
+def decode_token(token: str) -> dict[str, Any]:
+    return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
