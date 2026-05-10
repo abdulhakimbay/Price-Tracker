@@ -10,6 +10,8 @@ from app.api.dependencies import get_current_user
 from app.db.session import get_db
 from app.models import Product, Subscription, User
 from app.schemas import SubscriptionCreate, SubscriptionRead, SubscriptionUpdate
+from app.services.parser import parse_product_url
+from app.services.parser.exceptions import ParserError
 
 
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
@@ -29,7 +31,18 @@ async def create_subscription(
     product = product_result.scalar_one_or_none()
 
     if product is None:
-        product = Product(url=payload.url)
+        parsed_product = None
+        try:
+            parsed_product = await parse_product_url(payload.url)
+        except ParserError:
+            parsed_product = None
+
+        product = Product(
+            url=payload.url,
+            title=parsed_product.title if parsed_product else None,
+            current_price=parsed_product.price if parsed_product else None,
+            last_parsed_at=parsed_product.parsed_at if parsed_product else None,
+        )
         db.add(product)
         await db.flush()
 
