@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import datetime
 from urllib.parse import urlparse
 
 from app.schemas import PriceUpdateSchema
@@ -20,5 +20,5 @@ class DemoParser(BaseParser):
             url=url,
             title=f"Demo {title}",
             price=price,
-            parsed_at=datetime.now(UTC),
+            parsed_at=datetime.utcnow(),
         )

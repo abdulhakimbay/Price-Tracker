@@ -12,13 +12,13 @@ class Base(DeclarativeBase):
 intpk = Annotated[int, mapped_column(primary_key=True)]
 
 created_at = Annotated[datetime.datetime, mapped_column(
-    default=lambda: datetime.datetime.now(datetime.UTC), 
+    default=datetime.datetime.utcnow,
     server_default=text("TIMEZONE('utc', now())"),
     nullable=False
 )]
 
 updated_at = Annotated[datetime.datetime, mapped_column(
-    default=lambda: datetime.datetime.now(datetime.UTC),
+    default=datetime.datetime.utcnow,
     server_default=text("TIMEZONE('utc', now())"),
     onupdate=func.now(), 
     nullable=False
