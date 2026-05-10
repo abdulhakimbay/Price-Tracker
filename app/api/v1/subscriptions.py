@@ -1,28 +1,128 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from app.api.dependencies import get_current_user
+from app.db.session import get_db
+from app.models import Product, Subscription, User
+from app.schemas import SubscriptionCreate, SubscriptionRead, SubscriptionUpdate
 
 
 router = APIRouter(prefix="/subscriptions", tags=["subscriptions"])
 
 
-@router.post("/")
-async def create_subscription() -> dict[str, str]:
-    return {"message": "Create subscription endpoint is not implemented yet"}
+@router.post(
+    "/",
+    response_model=SubscriptionRead,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_subscription(
+    payload: SubscriptionCreate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> SubscriptionRead:
+    product_result = await db.execute(select(Product).where(Product.url == payload.url))
+    product = product_result.scalar_one_or_none()
+
+    if product is None:
+        product = Product(url=payload.url)
+        db.add(product)
+        await db.flush()
+
+    subscription = Subscription(
+        user_id=current_user.id,
+        product_id=product.id,
+        target_price=payload.target_price,
+    )
+    db.add(subscription)
+
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Subscription for this product already exists",
+        )
+
+    result = await db.execute(
+        select(Subscription)
+        .options(selectinload(Subscription.product))
+        .where(Subscription.id == subscription.id)
+    )
+    created_subscription = result.scalar_one()
+    return SubscriptionRead.model_validate(created_subscription)
 
 
-@router.get("/")
-async def list_subscriptions() -> dict[str, str]:
-    return {"message": "List subscriptions endpoint is not implemented yet"}
+@router.get("/", response_model=list[SubscriptionRead])
+async def list_subscriptions(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> list[SubscriptionRead]:
+    result = await db.execute(
+        select(Subscription)
+        .options(selectinload(Subscription.product))
+        .where(Subscription.user_id == current_user.id)
+        .order_by(Subscription.created_at.desc())
+    )
+    subscriptions = result.scalars().all()
+    return [SubscriptionRead.model_validate(subscription) for subscription in subscriptions]
 
 
-@router.patch("/{subscription_id}")
-async def update_subscription(subscription_id: int) -> dict[str, str]:
-    return {
-        "message": f"Update subscription endpoint is not implemented yet: {subscription_id}"
-    }
+@router.patch("/{subscription_id}", response_model=SubscriptionRead)
+async def update_subscription(
+    subscription_id: int,
+    payload: SubscriptionUpdate,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> SubscriptionRead:
+    result = await db.execute(
+        select(Subscription)
+        .options(selectinload(Subscription.product))
+        .where(
+            Subscription.id == subscription_id,
+            Subscription.user_id == current_user.id,
+        )
+    )
+    subscription = result.scalar_one_or_none()
+
+    if subscription is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found",
+        )
+
+    subscription.target_price = payload.target_price
+    await db.commit()
+    await db.refresh(subscription, attribute_names=["product"])
+
+    return SubscriptionRead.model_validate(subscription)
 
 
-@router.delete("/{subscription_id}")
-async def delete_subscription(subscription_id: int) -> dict[str, str]:
-    return {
-        "message": f"Delete subscription endpoint is not implemented yet: {subscription_id}"
-    }
+@router.delete("/{subscription_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_subscription(
+    subscription_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> Response:
+    result = await db.execute(
+        select(Subscription).where(
+            Subscription.id == subscription_id,
+            Subscription.user_id == current_user.id,
+        )
+    )
+    subscription = result.scalar_one_or_none()
+
+    if subscription is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Subscription not found",
+        )
+
+    await db.delete(subscription)
+    await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
