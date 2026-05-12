@@ -55,6 +55,7 @@ async def create_subscription(
 
     try:
         await db.commit()
+        await db.refresh(subscription, ["product"])
     except IntegrityError:
         await db.rollback()
         raise HTTPException(
@@ -62,13 +63,7 @@ async def create_subscription(
             detail="Subscription for this product already exists",
         )
 
-    result = await db.execute(
-        select(Subscription)
-        .options(selectinload(Subscription.product))
-        .where(Subscription.id == subscription.id)
-    )
-    created_subscription = result.scalar_one()
-    return SubscriptionRead.model_validate(created_subscription)
+    return SubscriptionRead.model_validate(subscription)
 
 
 @router.get("/", response_model=list[SubscriptionRead])
