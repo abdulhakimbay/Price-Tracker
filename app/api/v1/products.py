@@ -7,10 +7,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.dependencies import get_current_user
 from app.db.session import get_db
 from app.models import PriceHistory, Product
-from app.schemas import PriceHistoryRead
+from app.schemas import PriceHistoryRead, ProductRead
 
 
 router = APIRouter(prefix="/products", tags=["products"])
+
+
+@router.get(
+    "/{product_id}",
+    response_model=ProductRead,
+)
+async def get_product(
+    product_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+) -> ProductRead:
+    product_result = await db.execute(
+        select(Product).where(Product.id == product_id)
+    )
+
+    product = product_result.scalar_one_or_none()
+
+    if product is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Product not found",
+        )
+
+    return ProductRead.model_validate(product)
 
 
 @router.get(
