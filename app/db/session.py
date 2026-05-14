@@ -1,9 +1,27 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+"""Database session utilities shared by API handlers and background jobs."""
+
+import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
 from app.core.config import settings
 
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
-SessionLocal = async_sessionmaker(autocommit=False, autoflush=False, bind=engine)
+logger = logging.getLogger(__name__)
 
-async def get_db():
+engine = create_async_engine(settings.DATABASE_URL, echo=False)
+SessionLocal = async_sessionmaker(
+    bind=engine,
+    class_=AsyncSession,
+    autoflush=False,
+    expire_on_commit=False,
+)
+
+
+async def get_db() -> AsyncSession:
+    """Yield a request-scoped async database session."""
+    logger.info("event=db_session_opened scope=request")
     async with SessionLocal() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            logger.info("event=db_session_closed scope=request")
