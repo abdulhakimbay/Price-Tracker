@@ -93,22 +93,24 @@ async def create_subscription(
         payload.url,
     )
     product = await _get_or_create_product(db, payload.url)
+    product_id = product.id
+    user_id = current_user.id
     subscription = Subscription(
-        user_id=current_user.id,
-        product_id=product.id,
+        user_id=user_id,
+        product_id=product_id,
         target_price=payload.target_price,
     )
     db.add(subscription)
 
     try:
         await db.commit()
-        await db.refresh(subscription, ["product"])
+        await db.refresh(subscription, ["product", "created_at", "updated_at"])
     except IntegrityError:
         await db.rollback()
         logger.warning(
             "event=subscription_create_rejected reason=duplicate user_id=%s product_id=%s",
-            current_user.id,
-            product.id,
+            user_id,
+            product_id,
         )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -164,7 +166,7 @@ async def update_subscription(
     )
     subscription.target_price = payload.target_price
     await db.commit()
-    await db.refresh(subscription, attribute_names=["product"])
+    await db.refresh(subscription, attribute_names=["product", "created_at", "updated_at"])
 
     logger.info(
         "event=subscription_updated subscription_id=%s target_price=%s",
