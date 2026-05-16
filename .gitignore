@@ -58,3 +58,8 @@ coverage.xml
 # --- OS Specific ---
 .DS_Store
 Thumbs.db
+
+# --- Celery ---
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
