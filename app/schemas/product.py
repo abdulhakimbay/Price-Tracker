@@ -1,9 +1,13 @@
+"""Pydantic schemas for product read responses."""
+
 import datetime
 
 from .base import BaseSchema
 
 
 class ProductRead(BaseSchema):
+    """Public representation of a tracked product returned by the API."""
+
     id: int
     url: str
     title: str | None

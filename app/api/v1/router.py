@@ -1,3 +1,5 @@
+"""v1 router that registers all endpoint sub-routers."""
+
 from fastapi import APIRouter
 
 from app.api.v1.auth import router as auth_router

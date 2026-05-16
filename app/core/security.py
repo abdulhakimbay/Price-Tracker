@@ -17,13 +17,13 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a plain-text password against the stored hash."""
-    logger.info("event=password_verification_requested")
+    logger.debug("event=password_verification_requested")
     return pwd_context.verify(plain_password, hashed_password)
 
 
 def get_password_hash(password: str) -> str:
     """Hash a plain-text password before it is persisted."""
-    logger.info("event=password_hash_requested")
+    logger.debug("event=password_hash_requested")
     return pwd_context.hash(password)
 
 
@@ -73,5 +73,5 @@ def create_tokens_for_user(user_id: int) -> RefreshToken:
 
 def decode_token(token: str) -> dict[str, Any]:
     """Decode and validate a signed JWT token."""
-    logger.info("event=token_decode_requested")
+    logger.debug("event=token_decode_requested")
     return jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])

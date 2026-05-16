@@ -1,3 +1,5 @@
+"""Public re-exports for the services package."""
+
 from .notification import deliver_notification
 from .price_monitor import run_price_monitoring_cycle
 

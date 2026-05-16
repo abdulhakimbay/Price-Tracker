@@ -106,9 +106,18 @@ async def telegram_auth(
             telegram_full_name=payload.telegram_full_name,
         )
         db.add(user)
+        logger.info(
+            "event=telegram_user_created telegram_user_id=%s",
+            payload.telegram_user_id,
+        )
     else:
         user.telegram_username = payload.telegram_username
         user.telegram_full_name = payload.telegram_full_name
+        logger.info(
+            "event=telegram_user_updated user_id=%s telegram_user_id=%s",
+            user.id,
+            payload.telegram_user_id,
+        )
 
     try:
         await _save_changes(db)

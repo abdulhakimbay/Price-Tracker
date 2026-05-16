@@ -1,6 +1,8 @@
 """FastAPI application entrypoint."""
 
 import logging
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 
 from fastapi import FastAPI
 
@@ -12,21 +14,18 @@ configure_logging()
 logger = logging.getLogger(__name__)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    """Manage application startup and shutdown lifecycle."""
+    logger.info("event=application_startup status=started")
+    yield
+    logger.info("event=application_shutdown status=started")
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    lifespan=lifespan,
 )
-
-
-@app.on_event("startup")
-async def on_startup() -> None:
-    """Log application startup for operational visibility."""
-    logger.info("event=application_startup status=started")
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    """Log application shutdown for operational visibility."""
-    logger.info("event=application_shutdown status=started")
 
 
 @app.get("/health", tags=["health"])

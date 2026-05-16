@@ -1,3 +1,5 @@
+"""SQLAlchemy model for application users."""
+
 from sqlalchemy import CheckConstraint, text, BigInteger
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -5,6 +7,8 @@ from ..db.base import Base, intpk, created_at
 
 
 class User(Base):
+    """Represent an authenticated user who can subscribe to price alerts."""
+
     __tablename__ = "users"
     __table_args__ = (
         CheckConstraint(

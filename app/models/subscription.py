@@ -1,3 +1,5 @@
+"""SQLAlchemy model for user subscriptions to tracked products."""
+
 from sqlalchemy import ForeignKey, text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -5,6 +7,8 @@ from ..db.base import Base, intpk, created_at, updated_at
 
 
 class Subscription(Base):
+    """Link a user to a product with a target price threshold for notifications."""
+
     __tablename__ = "subscriptions"
 
     id: Mapped[intpk]

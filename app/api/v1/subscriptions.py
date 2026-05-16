@@ -152,6 +152,11 @@ async def update_subscription(
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> SubscriptionRead:
     """Update the target price of an owned subscription."""
+    logger.info(
+        "event=subscription_update_requested subscription_id=%s user_id=%s",
+        subscription_id,
+        current_user.id,
+    )
     subscription = await _get_owned_subscription_or_404(
         db,
         subscription_id=subscription_id,

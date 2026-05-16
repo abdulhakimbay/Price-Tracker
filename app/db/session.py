@@ -19,9 +19,9 @@ SessionLocal = async_sessionmaker(
 
 async def get_db() -> AsyncSession:
     """Yield a request-scoped async database session."""
-    logger.info("event=db_session_opened scope=request")
+    logger.debug("event=db_session_opened scope=request")
     async with SessionLocal() as session:
         try:
             yield session
         finally:
-            logger.info("event=db_session_closed scope=request")
+            logger.debug("event=db_session_closed scope=request")

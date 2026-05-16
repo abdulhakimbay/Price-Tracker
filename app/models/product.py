@@ -1,3 +1,5 @@
+"""SQLAlchemy models for products and price history."""
+
 import datetime
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -6,6 +8,8 @@ from ..db.base import Base, intpk
 
 
 class Product(Base):
+    """Represent a tracked product URL with its latest price metadata."""
+
     __tablename__ = "products"
 
     id: Mapped[intpk]
@@ -18,6 +22,8 @@ class Product(Base):
 
 
 class PriceHistory(Base):
+    """Record one observed price for a product at a specific point in time."""
+
     __tablename__ = "price_history"
 
     id: Mapped[intpk]
@@ -25,5 +31,3 @@ class PriceHistory(Base):
     price: Mapped[float]
     timestamp: Mapped[datetime.datetime] = mapped_column(index=True)
     product: Mapped["Product"] = relationship(back_populates="price_history")
-
-

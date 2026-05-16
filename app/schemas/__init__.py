@@ -1,3 +1,5 @@
+"""Public re-exports for the schemas package."""
+
 from .price_history import PriceHistoryRead
 from .product import ProductRead
 from .parser import PriceUpdateSchema

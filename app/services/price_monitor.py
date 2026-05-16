@@ -1,4 +1,4 @@
-"""Background price monitoring service placeholders."""
+"""Background price monitoring service."""
 
 from __future__ import annotations
 

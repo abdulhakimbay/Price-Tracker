@@ -1,7 +1,7 @@
 """Demo parser implementation used before real website integrations exist."""
 
-from datetime import datetime
 import logging
+from datetime import UTC, datetime
 from urllib.parse import urlparse
 
 from app.schemas import PriceUpdateSchema
@@ -31,5 +31,5 @@ class DemoParser(BaseParser):
             url=url,
             title=f"Demo {title}",
             price=price,
-            parsed_at=datetime.utcnow(),
+            parsed_at=datetime.now(UTC),
         )

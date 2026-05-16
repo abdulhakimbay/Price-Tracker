@@ -82,6 +82,11 @@ async def _send_telegram_notification(payload: dict[str, Any]) -> str:
             f"Telegram delivery failed with status {response.status_code}: {response.text}"
         )
 
+    logger.info(
+        "event=telegram_api_response status_code=%s chat_id=%s",
+        response.status_code,
+        chat_id,
+    )
     return "telegram_sent"
 
 
@@ -120,6 +125,7 @@ def _send_email_via_smtp(message: EmailMessage) -> None:
 
         smtp.login(settings.SMTP_USERNAME, settings.SMTP_PASSWORD)
         smtp.send_message(message)
+        logger.info("event=smtp_message_sent recipient=%s", message["To"])
 
 
 def _build_telegram_message(payload: dict[str, Any]) -> str:
