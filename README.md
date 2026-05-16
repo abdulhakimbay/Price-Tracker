@@ -35,7 +35,7 @@ A robust, asynchronous price monitoring service built with FastAPI, SQLAlchemy, 
 
 1. **Clone the repository:**
    ```bash
-   git clone <repository_url>
+   git clone [<repository_url>](https://github.com/abdulhakimbay/Price-Tracker.git)
    cd price_tracker
    ```
 
