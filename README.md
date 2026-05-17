@@ -95,9 +95,3 @@ The test suite is fully isolated and does not require PostgreSQL or Redis to be 
 ```bash
 uv run pytest tests/ -v --tb=short
 ```
-
-## Future Roadmap
-
-1. **Implement Real Parsers:** Replace `DemoParser` with actual scrapers using `selectolax` and `httpx` to parse real e-commerce stores (e.g., Amazon, local retailers).
-2. **Full Telegram Bot:** Implement a proper long-polling or webhook-based Telegram bot to allow users to add subscriptions directly via Telegram messages.
-3. **Frontend Dashboard:** Build a simple web UI for users to manage their tracked items easily.
